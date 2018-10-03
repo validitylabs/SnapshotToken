@@ -7,12 +7,12 @@
 
 pragma solidity 0.4.24;  
 
-import "./ISnapshotToken.sol";
+import "./IERC20SnapshotToken.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
 
-contract SnapshotToken is ERC20, ISnapshotToken {   
+contract ERC20SnapshotToken is ERC20, ISnapshotToken {   
     using SafeMath for uint256;
 
     /**
@@ -90,23 +90,11 @@ contract SnapshotToken is ERC20, ISnapshotToken {
     * @return True if the transfer was successful
     */
     function createSnapshot(address _from, address _to, uint _value) internal {
-        if (_value == 0) {
-            return;
-        }
-
-        // Do not allow transfer to 0x0 or the token contract itself
-        require((_to != address(0)) && (_to != address(this)));
-
-        // If the amount being transfered is more than the balance of the account the transfer throws
+        // First update the balance array with the new value for the address sending the tokens
         uint256 previousBalanceFrom = balanceOf(_from);
-        require(previousBalanceFrom >= _value);
-
-        // First update the balance array with the new value for the address
-        // sending the tokens
         updateValueAtNow(_snapshotBalances[_from], previousBalanceFrom.sub(_value));
 
-        // Then update the balance array with the new value for the address
-        // receiving the tokens
+        // Then update the balance array with the new value for the address receiving the tokens
         uint256 previousBalanceTo = balanceOf(_to);
         updateValueAtNow(_snapshotBalances[_to], previousBalanceTo.add(_value));
 
@@ -167,7 +155,6 @@ contract SnapshotToken is ERC20, ISnapshotToken {
     */
     function snapshotBurn(address _account, uint256 _value) internal {
         uint256 previousBalanceFrom = balanceOf(_account);
-        require(previousBalanceFrom >= _value);
         uint256 newBalance = previousBalanceFrom.sub(_value);
    
         updateValueAtNow(_snapshotTotalSupply, totalSupply().sub(_value));

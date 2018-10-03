@@ -5,11 +5,11 @@
 
 pragma solidity 0.4.24;  
 
-import "./SnapshotToken.sol";
+import "./ERC20SnapshotToken.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20Mintable.sol";
 
 
-contract MintableSnapshotToken is ERC20Mintable, SnapshotToken {   
+contract MintableERC20SnapshotToken is ERC20Mintable, ERC20SnapshotToken {   
     using SafeMath for uint256;
 
     /**

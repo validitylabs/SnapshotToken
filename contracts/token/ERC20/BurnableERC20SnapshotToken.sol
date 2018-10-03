@@ -5,11 +5,11 @@
 
 pragma solidity 0.4.24;  
 
-import "./SnapshotToken.sol";
+import "./ERC20SnapshotToken.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20Burnable.sol";
 
 
-contract BurnableSnapshotToken is ERC20Burnable, SnapshotToken {   
+contract BurnableERC20SnapshotToken is ERC20Burnable, ERC20SnapshotToken {   
     using SafeMath for uint256;
 
     /**
