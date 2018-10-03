@@ -44,35 +44,45 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
             (await exTokenInstance.decimals()).should.be.bignumber.equal(decimals);
         });
 
-        it('has an owner', async () => {
-            (await exTokenInstance.owner()).should.be.equal(initialOwner);
+        it('is a minter', async () => {
+            (await exTokenInstance.isMinter(initialOwner)).should.be.equal(true);
         });
     });
 
-    describe('transferOwnership', async () => {
-        context('when called by a non-owner account', async () => {
+    describe('add Minters', async () => {
+        context('when called by a non-minter account', async () => {
             it('fails', async () => {
-                await expectThrow(exTokenInstance.transferOwnership(anotherAccount, {from: anotherAccount}));
+                await expectThrow(exTokenInstance.addMinter(anotherAccount, {from: anotherAccount}));
             });
         });
 
-        context('when called by the owner', async () => {
-            it('transfers ownership successfully', async () => {
-                await exTokenInstance.transferOwnership(owner, {from: initialOwner});
+        context('when called by a minter', async () => {
+            it('adds another minter', async () => {
+                (await exTokenInstance.isMinter(owner)).should.be.equal(false);
 
-                (await exTokenInstance.owner()).should.be.equal(owner);
+                await exTokenInstance.addMinter(owner, {from: initialOwner});
+
+                (await exTokenInstance.isMinter(owner)).should.be.equal(true);
+            });
+        });
+
+        context('give up minter role', async () => {
+            it('passes', async () => {
+                await exTokenInstance.renounceMinter({from: initialOwner});
+
+                (await exTokenInstance.isMinter(initialOwner)).should.be.equal(false);
             });
         });
     });
 
     describe('mint', async () => {
-        context('when called by a non-owner account', async () => {
+        context('when called by a non-minter account', async () => {
             it('fails', async () => {
                 await expectThrow(exTokenInstance.mint(owner, totalSupply, {from: anotherAccount}));
             });
         });
 
-        context('when called by the owner account', async () => {
+        context('when called by a minter account', async () => {
             let tx;
             let tx2;
             let blockNum;

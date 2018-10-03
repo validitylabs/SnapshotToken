@@ -80,40 +80,6 @@ contract SnapshotToken is ERC20, ISnapshotToken {
         return getValueAt(_snapshotTotalSupply, _blockNumber);
     }
 
-    /**
-    * @notice Generates `_value` tokens that are assigned to `_owner`
-    * @param _to The address that will be assigned the new tokens
-    * @param _value The quantity of tokens generated
-    * @return True if the tokens are generated correctly
-    */
-    // function mint(address _to, uint256 _value) public returns (bool) {
-    //     uint curTotalSupply = totalSupply();
-    //     uint previousBalanceTo = balanceOf(_to);
-    //     updateValueAtNow(_snapshotTotalSupply, curTotalSupply.add(_value));
-    //     updateValueAtNow(_snapshotBalances[_to], previousBalanceTo.add(_value));
-    //     emit Mint(_to, _value);
-    //     emit Transfer(address(0), _to, _value);
-    //     return true;
-    // }
-
-    /**
-    * @dev called to burn _value of tokens by the msg.sender
-    * @param _value uint256 the amount of tokens to burn
-    */
-    // function burn(uint256 _value) public {
-    //     uint256 curTotalSupply = totalSupply();
-    //     uint256 previousBalanceFrom = balanceOf(msg.sender);
-    //     require(previousBalanceFrom >= _value);
-    //     // no need to require value <= totalSupply, since that would imply the
-    //     // sender's balance is greater than the totalSupply, which *should* be an assertion failure
-    //     // mint method takes cares of updating both totalSupply and balanceOf[_to]
-
-    //     updateValueAtNow(_snapshotTotalSupply, curTotalSupply.sub(_value));
-    //     updateValueAtNow(_snapshotBalances[msg.sender], previousBalanceFrom.sub(_value));
-    //     emit Burn(msg.sender, _value);
-    //     emit Transfer(msg.sender, address(0), _value);
-    // }
-
     /*** Internal functions ***/
     /**
     * @dev This is the actual transfer function in the token contract, it can
@@ -167,7 +133,7 @@ contract SnapshotToken is ERC20, ISnapshotToken {
         } 
 
         // Binary search of the value in the array
-        uint min = 0;
+        uint min;
         uint max = checkpoints.length.sub(1);
 
         while (max > min) {
@@ -193,5 +159,30 @@ contract SnapshotToken is ERC20, ISnapshotToken {
         } else {
             checkpoints[checkpoints.length.sub(1)].value = uint128(_value);
         }
+    }
+
+    /**
+    * @notice burns `_value` tokens that are assigned to `_account`
+    * @param _value The quantity of tokens burned
+    */
+    function snapshotBurn(address _account, uint256 _value) internal {
+        uint256 previousBalanceFrom = balanceOf(_account);
+        require(previousBalanceFrom >= _value);
+        uint256 newBalance = previousBalanceFrom.sub(_value);
+   
+        updateValueAtNow(_snapshotTotalSupply, totalSupply().sub(_value));
+        updateValueAtNow(_snapshotBalances[_account], newBalance);
+        emit SnapshotCreated(_account, 0x0, newBalance);
+    }
+    
+    /**
+    * @notice Generates `_value` tokens that are assigned to `_to`
+    * @param _to The address that will be assigned the new tokens
+    * @param _value The quantity of tokens generated
+    */
+    function snapshotMint(address _to, uint256 _value) internal {
+        updateValueAtNow(_snapshotTotalSupply, totalSupply().add(_value));
+        updateValueAtNow(_snapshotBalances[_to], balanceOf(_to).add(_value));
+        emit SnapshotCreated(0x0, _to, _value);
     }
 }
