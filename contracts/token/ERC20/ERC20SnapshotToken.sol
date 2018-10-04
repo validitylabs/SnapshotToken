@@ -35,7 +35,7 @@ contract ERC20SnapshotToken is ERC20, IERC20SnapshotToken {
     Snapshot[] private _snapshotTotalSupply;
 
     /*** EVENTS ***/
-    event SnapshotCreated(address indexed from, address indexed to, uint256 amount);
+    event SnapshotCreated(address indexed from, address indexed to, uint256 value);
 
     /*** FUNCTIONS ***/
     /**
@@ -44,9 +44,9 @@ contract ERC20SnapshotToken is ERC20, IERC20SnapshotToken {
     * @param _value The amount of tokens to be transferred
     * @return Whether the transfer was successful or not
     */
-    function transfer(address _to, uint256 _value) public returns (bool) {
+    function transfer(address _to, uint256 _value) public returns (bool result) {
+        result = super.transfer(_to, _value);
         createSnapshot(msg.sender, _to, _value);
-        return super.transfer(_to, _value);
     }
 
     /**
@@ -56,9 +56,9 @@ contract ERC20SnapshotToken is ERC20, IERC20SnapshotToken {
     * @param _value The amount of tokens to be transferred
     * @return True if the transfer was successful
     */
-    function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
-        createSnapshot(msg.sender, _to, _value);
-        return super.transferFrom(_from, _to, _value);
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool result) {
+        result = super.transferFrom(_from, _to, _value);
+        createSnapshot(_from, _to, _value);
     }
 
     /**
@@ -72,7 +72,7 @@ contract ERC20SnapshotToken is ERC20, IERC20SnapshotToken {
     }
 
     /**
-    * @notice Total amount of tokens at a specific `_blockNumber`.
+    * @dev Total amount of tokens at a specific `_blockNumber`.
     * @param _blockNumber The block number when the totalSupply is queried
     * @return The total amount of tokens at `_blockNumber`
     */
@@ -82,23 +82,16 @@ contract ERC20SnapshotToken is ERC20, IERC20SnapshotToken {
 
     /*** Internal functions ***/
     /**
-    * @dev This is the actual transfer function in the token contract, it can
-    *  only be called by other functions in this contract.
+    * @dev Updates snapshot mappings for _from and _to and emit an event
     * @param _from The address holding the tokens being transferred
     * @param _to The address of the recipient
     * @param _value The amount of tokens to be transferred
     * @return True if the transfer was successful
     */
     function createSnapshot(address _from, address _to, uint _value) internal {
-        // First update the balance array with the new value for the address sending the tokens
-        uint256 previousBalanceFrom = balanceOf(_from);
-        updateValueAtNow(_snapshotBalances[_from], previousBalanceFrom.sub(_value));
-
-        // Then update the balance array with the new value for the address receiving the tokens
-        uint256 previousBalanceTo = balanceOf(_to);
-        updateValueAtNow(_snapshotBalances[_to], previousBalanceTo.add(_value));
-
-        // An event to make the transfer easy to find on the blockchain
+        updateValueAtNow(_snapshotBalances[_from], balanceOf(_from));
+        updateValueAtNow(_snapshotBalances[_to], balanceOf(_to));
+        
         emit SnapshotCreated(_from, _to, _value);
     }
 
@@ -150,26 +143,21 @@ contract ERC20SnapshotToken is ERC20, IERC20SnapshotToken {
     }
 
     /**
-    * @notice burns `_value` tokens that are assigned to `_account`
-    * @param _value The quantity of tokens burned
+    * @dev creates snapshot after the burn action takes place
     */
-    function snapshotBurn(address _account, uint256 _value) internal {
-        uint256 previousBalanceFrom = balanceOf(_account);
-        uint256 newBalance = previousBalanceFrom.sub(_value);
-   
-        updateValueAtNow(_snapshotTotalSupply, totalSupply().sub(_value));
-        updateValueAtNow(_snapshotBalances[_account], newBalance);
-        emit SnapshotCreated(_account, 0x0, newBalance);
+    function snapshotBurn(address _account) internal {
+        updateValueAtNow(_snapshotTotalSupply, totalSupply());
+        updateValueAtNow(_snapshotBalances[_account], balanceOf(_account));
+        emit SnapshotCreated(_account, 0x0, balanceOf(_account));
     }
     
     /**
-    * @notice Generates `_value` tokens that are assigned to `_to`
+    * @dev creates a snapshot after the mint action takes place
     * @param _to The address that will be assigned the new tokens
-    * @param _value The quantity of tokens generated
     */
-    function snapshotMint(address _to, uint256 _value) internal {
-        updateValueAtNow(_snapshotTotalSupply, totalSupply().add(_value));
-        updateValueAtNow(_snapshotBalances[_to], balanceOf(_to).add(_value));
-        emit SnapshotCreated(0x0, _to, _value);
+    function snapshotMint(address _to) internal {
+        updateValueAtNow(_snapshotTotalSupply, totalSupply());
+        updateValueAtNow(_snapshotBalances[_to], balanceOf(_to));
+        emit SnapshotCreated(0x0, _to, balanceOf(_to));
     }
 }

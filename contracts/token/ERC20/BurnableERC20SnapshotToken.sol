@@ -18,7 +18,7 @@ contract BurnableERC20SnapshotToken is ERC20Burnable, ERC20SnapshotToken {
     */
     function burn(uint256 _value) public {
         super.burn(_value);
-        snapshotBurn(msg.sender, _value);
+        snapshotBurn(msg.sender);
     }
 
     /**
@@ -27,6 +27,6 @@ contract BurnableERC20SnapshotToken is ERC20Burnable, ERC20SnapshotToken {
     */
     function burnFrom(address _account, uint256 _value) public {
         super.burnFrom(_account, _value);
-        snapshotBurn(_account, _value);
+        snapshotBurn(_account);
     }
 }

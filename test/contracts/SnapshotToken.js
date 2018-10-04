@@ -5,8 +5,7 @@
  */
 
 import {expectThrow, getEvents, BigNumber} from './helpers/tools';
-const expectEvent = require('./helpers/expectEvent');
-require('truffle-test-utils').init();
+import {logger as log} from '../../tools/lib/logger';
 
 const ExToken = artifacts.require('./ExToken');
 
@@ -138,29 +137,14 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
                 (await exTokenInstance.balanceOfAt(recipient1, blockNum2 - 1)).should.be.bignumber.equal(0);
             });
 
-            it.skip('emits a mint event', async () => {
-                // expectEvent.inLogs(tx, 'Mint', {
-                //     from: zeroAddress,
-                //     to: owner,
-                //     value: amount
-                // });
+            it('emits a transfer event', async () => {
+                const mintEvents = getEvents(tx, 'Transfer');
+                mintEvents[0].to.should.be.equal(owner);
+                mintEvents[0].value.should.be.bignumber.equal(totalSupply.sub(amount));
 
-                assert.web3Event(tx, {
-                    event: 'Mint',
-                    args: {
-                        from: 'zeroAddress',
-                        to: owner,
-                        value: amount
-                    }
-                }, 'The event is emitted');
-
-                // const mintEvents = getEvents(tx, 'Mint');
-                // mintEvents[0].to.should.be.equal(owner);
-                // mintEvents[0].amount.should.be.bignumber.equal(totalSupply.sub(amount));
-
-                // const mintEvents2 = getEvents(tx2, 'Mint');
-                // mintEvents2[0].to.should.be.equal(recipient1);
-                // mintEvents2[0].amount.should.be.bignumber.equal(amount);
+                const mintEvents2 = getEvents(tx2, 'Transfer');
+                mintEvents2[0].to.should.be.equal(recipient1);
+                mintEvents2[0].value.should.be.bignumber.equal(amount);
             });
 
             it('emits a transfer event', async () => {
@@ -224,13 +208,6 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
                     });
                 });
 
-                context('when recipient is the token contract', async () => {
-                    it.skip('fails', async () => {
-                        await expectThrow(exTokenInstance.transfer(exTokenInstance.address, amount, {from: recipient1}));
-                        (await exTokenInstance.balanceOf(exTokenInstance.address)).should.be.bignumber.equal(0);
-                    });
-                });
-
                 context('when recipient is different to zero address and the token contract', async () => {
                     context('when amount is zero', async () => {
                         it('emits a transfer event', async () => {
@@ -246,14 +223,16 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
                     context('when amount is different to zero', async () => {
                         let tx;
                         let blockNum;
+                        let amount;
                         before(async () => {
+                            amount = await exTokenInstance.balanceOf(recipient1);
                             tx = await exTokenInstance.transfer(recipient3, amount, {from: recipient1});
                             blockNum = web3.eth.blockNumber;
                         });
 
                         it('transfers requested amount', async () => {
-                            (await exTokenInstance.balanceOfAt(recipient1, blockNum)).should.be.bignumber.equal(0);
-                            (await exTokenInstance.balanceOfAt(recipient3, blockNum)).should.be.bignumber.equal(amount);
+                            (await exTokenInstance.balanceOf(recipient1)).should.be.bignumber.equal(0);
+                            (await exTokenInstance.balanceOf(recipient3)).should.be.bignumber.equal(amount);
 
                             (await exTokenInstance.balanceOfAt(recipient1, blockNum - 1)).should.be.bignumber.equal(amount);
                             (await exTokenInstance.balanceOfAt(recipient3, blockNum - 1)).should.be.bignumber.equal(0);
@@ -353,6 +332,12 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
                 let tx;
                 let blockNum;
                 before(async () => {
+                    let balance = await exTokenInstance.balanceOf(owner);
+                    log.info(balance.toNumber());
+
+                    balance = await exTokenInstance.balanceOf(initialOwner);
+                    log.info(balance.toNumber());
+
                     tx = await exTokenInstance.transferFrom(owner, initialOwner, amount, {from: anotherAccount});
                     blockNum = web3.eth.blockNumber;
                 });
@@ -360,15 +345,35 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
                 it('transfers the requested amount', async () => {
                     (await exTokenInstance.allowance(owner, anotherAccount)).should.be.bignumber.equal(0);
 
-                    (await exTokenInstance.balanceOfAt(owner, blockNum)).should.be.bignumber.equal(totalSupply.sub(amount.mul(2)));
+                    let balance = await exTokenInstance.balanceOf(owner);
+                    log.info(balance.toNumber());
+                    balance = await exTokenInstance.balanceOf(initialOwner);
+                    log.info(balance.toNumber());
+                    (await exTokenInstance.balanceOf(owner)).should.be.bignumber.equal(totalSupply.sub(amount.mul(2)));
+                    (await exTokenInstance.balanceOf(initialOwner)).should.be.bignumber.equal(amount);
+
+                    balance = await exTokenInstance.balanceOfAt(owner, blockNum);
+                    log.info(balance.toNumber());
+                    balance = await exTokenInstance.balanceOfAt(initialOwner, blockNum);
+                    log.info(balance.toNumber());
+                    (await exTokenInstance.balanceOfAt(owner, blockNum + 1)).should.be.bignumber.equal(totalSupply.sub(amount.mul(2)));
                     (await exTokenInstance.balanceOfAt(initialOwner, blockNum)).should.be.bignumber.equal(amount);
 
+                    balance = await exTokenInstance.balanceOfAt(owner, blockNum - 1);
+                    log.info(balance.toNumber());
                     (await exTokenInstance.balanceOfAt(owner, blockNum - 1)).should.be.bignumber.equal(totalSupply.sub(amount));
                     (await exTokenInstance.balanceOfAt(initialOwner, blockNum - 1)).should.be.bignumber.equal(0);
                 });
 
                 it('emits a transfer event', async () => {
                     const transferEvents = getEvents(tx, 'Transfer');
+                    transferEvents[0].from.should.be.equal(owner);
+                    transferEvents[0].to.should.be.equal(initialOwner);
+                    transferEvents[0].value.should.be.bignumber.equal(amount);
+                });
+
+                it('emits a snapshot event', async () => {
+                    const transferEvents = getEvents(tx, 'SnapshotCreated');
                     transferEvents[0].from.should.be.equal(owner);
                     transferEvents[0].to.should.be.equal(initialOwner);
                     transferEvents[0].value.should.be.bignumber.equal(amount);
@@ -459,17 +464,13 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
             });
 
             it('burns the requested amount', async () => {
+                (await exTokenInstance.totalSupply()).should.be.bignumber.equal(totalSupply.sub(amount));
+
                 (await exTokenInstance.totalSupplyAt(blockNum)).should.be.bignumber.equal(totalSupply.sub(amount));
                 (await exTokenInstance.totalSupplyAt(blockNum - 1)).should.be.bignumber.equal(totalSupply);
 
                 (await exTokenInstance.balanceOfAt(owner, blockNum)).should.be.bignumber.equal(0);
                 (await exTokenInstance.balanceOfAt(owner, blockNum - 1)).should.be.bignumber.equal(amount);
-            });
-
-            it('emits a burn event', async () => {
-                const burnEvents = getEvents(tx, 'Burn');
-                burnEvents[0].burner.should.be.equal(owner);
-                burnEvents[0].value.should.be.bignumber.equal(amount);
             });
 
             it('emits a transfer event', async () => {

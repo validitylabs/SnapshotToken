@@ -5,8 +5,8 @@
 
 pragma solidity 0.4.24;  
 
-import "./ERC20SnapshotToken.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20Mintable.sol";
+import "./ERC20SnapshotToken.sol";
 
 
 contract MintableERC20SnapshotToken is ERC20Mintable, ERC20SnapshotToken {   
@@ -18,8 +18,8 @@ contract MintableERC20SnapshotToken is ERC20Mintable, ERC20SnapshotToken {
     * @param _value The quantity of tokens generated
     * @return True if the tokens are generated correctly
     */
-    function mint(address _to, uint256 _value) public returns (bool) {
-        snapshotMint(_to, _value);
-        return super.mint(_to, _value);
+    function mint(address _to, uint256 _value) public returns (bool result) {
+        result = super.mint(_to, _value);
+        snapshotMint(_to);
     }
 }
