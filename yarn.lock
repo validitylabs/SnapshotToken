@@ -6421,6 +6421,12 @@ truffle-hdwallet-provider@^0.0.6:
     web3 "^0.18.2"
     web3-provider-engine "^14.0.5"
 
+truffle-test-utils@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/truffle-test-utils/-/truffle-test-utils-0.1.0.tgz#4aedbcc707ff629daf0a4cae483dcb2e3c9ecd31"
+  dependencies:
+    chai "^4.1.2"
+
 truffle@^4.1.14:
   version "4.1.14"
   resolved "https://registry.yarnpkg.com/truffle/-/truffle-4.1.14.tgz#8d2c298e29abf9b1e486e44ff9faca6d34bb9030"

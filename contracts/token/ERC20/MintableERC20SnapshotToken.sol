@@ -1,5 +1,5 @@
 /**
- * @title Mintable SnapshotToken
+ * @title Mintable ERC20 SnapshotToken
  * @author Validity Labs AG <info@validitylabs.org>
  */
 

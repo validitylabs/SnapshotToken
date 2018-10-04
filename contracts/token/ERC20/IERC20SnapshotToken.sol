@@ -1,5 +1,5 @@
 /**
- * @title Interface SnapshotToken (abstract contract)
+ * @title Interface ERC20 SnapshotToken (abstract contract)
  * @version 1.0
  * @author Validity Labs AG <info@validitylabs.org>
  */
@@ -8,7 +8,7 @@ pragma solidity 0.4.24;
 
 
 /* solhint-disable no-empty-blocks */
-contract ISnapshotToken {   
+contract IERC20SnapshotToken {   
     /**
     * @dev Queries the balance of `_owner` at a specific `_blockNumber`
     * @param _owner The address from which the balance will be retrieved

@@ -1,18 +1,18 @@
 /**
- * @title SnapshotToken
- * ERC20 Token inspired by Jordi Baylina's MiniMeToken to record historical balances
+ * @title ERC20 Snapshot Token
+ * inspired by Jordi Baylina's MiniMeToken to record historical balances
  * @version 1.0
  * @author Validity Labs AG <info@validitylabs.org>
  */
 
 pragma solidity 0.4.24;  
 
-import "./IERC20SnapshotToken.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import "./IERC20SnapshotToken.sol";
 
 
-contract ERC20SnapshotToken is ERC20, ISnapshotToken {   
+contract ERC20SnapshotToken is ERC20, IERC20SnapshotToken {   
     using SafeMath for uint256;
 
     /**

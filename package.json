@@ -37,6 +37,7 @@
     "openzeppelin-solidity": "^2.0.0-rc.2",
     "solcpiler": "^1.0.0-beta.9",
     "truffle-contract": "^3.0.6",
+    "truffle-test-utils": "^0.1.0",
     "web3": "^1.0.0-beta.36",
     "winston": "^3.0.0"
   },

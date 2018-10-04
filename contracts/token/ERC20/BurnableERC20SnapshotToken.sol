@@ -1,5 +1,5 @@
 /**
- * @title Burnable Snapshot Token
+ * @title Burnable ERC20 Snapshot Token
  * @author Validity Labs AG <info@validitylabs.org>
  */
 
