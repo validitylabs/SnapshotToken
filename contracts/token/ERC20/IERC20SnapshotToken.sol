@@ -1,6 +1,5 @@
 /**
  * @title Interface ERC20 SnapshotToken (abstract contract)
- * @version 1.0
  * @author Validity Labs AG <info@validitylabs.org>
  */
 

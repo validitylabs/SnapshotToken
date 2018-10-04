@@ -1,7 +1,6 @@
 /**
  * @title ERC20 Snapshot Token
  * inspired by Jordi Baylina's MiniMeToken to record historical balances
- * @version 1.0
  * @author Validity Labs AG <info@validitylabs.org>
  */
 
