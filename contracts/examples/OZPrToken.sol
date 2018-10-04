@@ -5,16 +5,11 @@
 
 pragma solidity 0.4.24;  
 
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20Pausable.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20Burnable.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20Mintable.sol";
-import "../token/ERC20/ERC20SnapshotToken.sol";
-import "../token/ERC20/BurnableERC20SnapshotToken.sol";
-import "../token/ERC20/MintableERC20SnapshotToken.sol";
+import "../0zPr/ERC20Snapshot.sol";
 
 /* solhint-disable */
-contract ExToken is ERC20Pausable, ERC20SnapshotToken, MintableERC20SnapshotToken, BurnableERC20SnapshotToken {
-    string public constant name = "Example Token";
-    string public constant symbol = "ExT";
+contract OzPrToken is ERC20Snapshot {
+    string public constant name = "OZ PR TOKEN";
+    string public constant symbol = "OZPR";
     uint8 public constant decimals = 18;
 }
