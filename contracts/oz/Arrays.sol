@@ -1,8 +1,9 @@
-pragma solidity ^0.4.23;
+pragma solidity 0.4.24;
 
-import "../math/Math.sol";
+import "openzeppelin-solidity/contracts/math/Math.sol";
 
 
+/* solhint-disable */
 /**
  * @title Arrays
  * @dev Utility library of inline array functions

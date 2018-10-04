@@ -1,9 +1,10 @@
-pragma solidity ^0.4.24;
+pragma solidity 0.4.24;
 
-import "./ERC20.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "./Arrays.sol";
 
 
+/* solhint-disable */
 /**
  * @title ERC20Snapshot token
  * @dev An ERC20 token which enables taking snapshots of account balances.
@@ -111,20 +112,20 @@ contract ERC20Snapshot is ERC20 {
     super._burn(account, amount);
   }
 
-  function updateSnapshot(address account) private {
-    if (lastSnapshotId(account) < currentSnapshotId) {
-      snapshotIds[account].push(currentSnapshotId);
-      snapshotBalances[account].push(balanceOf(account));
+    function updateSnapshot(address account) private {
+        if (lastSnapshotId(account) < currentSnapshotId) {
+            snapshotIds[account].push(currentSnapshotId);
+            snapshotBalances[account].push(balanceOf(account));
+        }
     }
-  }
 
-  function lastSnapshotId(address account) private view returns (uint256) {
-    uint256[] storage snapshots = snapshotIds[account];
-    if (snapshots.length == 0) {
-      return 0;
-    } else {
-      return snapshots[snapshots.length - 1];
+    function lastSnapshotId(address account) private view returns (uint256) {
+        uint256[] storage snapshots = snapshotIds[account];
+        if (snapshots.length == 0) {
+        return 0;
+        } else {
+        return snapshots[snapshots.length - 1];
+        }
     }
-  }
-  
+    
 }

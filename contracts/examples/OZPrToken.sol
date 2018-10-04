@@ -1,11 +1,10 @@
 /**
- * @title Example Token
- * @author Validity Labs AG <info@validitylabs.org>
+ * @title Open Zeppelin's Pending PR Snapshot Token 
  */
 
 pragma solidity 0.4.24;  
 
-import "../0zPr/ERC20Snapshot.sol";
+import "../oz/ERC20Snapshot.sol";
 
 /* solhint-disable */
 contract OzPrToken is ERC20Snapshot {

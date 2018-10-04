@@ -34,7 +34,7 @@ contract ERC20SnapshotToken is ERC20, IERC20SnapshotToken {
     Snapshot[] private _snapshotTotalSupply;
 
     /*** FUNCTIONS ***/
-    /**
+    /** OVERRIDE
     * @dev Send `_value` tokens to `_to` from `msg.sender`
     * @param _to The address of the recipient
     * @param _value The amount of tokens to be transferred
@@ -42,10 +42,10 @@ contract ERC20SnapshotToken is ERC20, IERC20SnapshotToken {
     */
     function transfer(address _to, uint256 _value) public returns (bool result) {
         result = super.transfer(_to, _value);
-        createSnapshot(msg.sender, _to, _value);
+        createSnapshot(msg.sender, _to);
     }
 
-    /**
+    /** OVERRIDE
     * @dev Send `_value` tokens to `_to` from `_from` on the condition it is approved by `_from`
     * @param _from The address holding the tokens being transferred
     * @param _to The address of the recipient
@@ -54,7 +54,7 @@ contract ERC20SnapshotToken is ERC20, IERC20SnapshotToken {
     */
     function transferFrom(address _from, address _to, uint256 _value) public returns (bool result) {
         result = super.transferFrom(_from, _to, _value);
-        createSnapshot(_from, _to, _value);
+        createSnapshot(_from, _to);
     }
 
     /**
@@ -81,10 +81,9 @@ contract ERC20SnapshotToken is ERC20, IERC20SnapshotToken {
     * @dev Updates snapshot mappings for _from and _to and emit an event
     * @param _from The address holding the tokens being transferred
     * @param _to The address of the recipient
-    * @param _value The amount of tokens to be transferred
     * @return True if the transfer was successful
     */
-    function createSnapshot(address _from, address _to, uint _value) internal {
+    function createSnapshot(address _from, address _to) internal {
         updateValueAtNow(_snapshotBalances[_from], balanceOf(_from));
         updateValueAtNow(_snapshotBalances[_to], balanceOf(_to));
     }
@@ -136,20 +135,41 @@ contract ERC20SnapshotToken is ERC20, IERC20SnapshotToken {
         }
     }
 
-    /**
-    * @dev creates snapshot after the burn action takes place
+    /** OVERRIDE
+    * @dev Internal function that mints an amount of the token and assigns it to
+    * an account. This encapsulates the modification of balances such that the
+    * proper events are emitted.
+    * @param account The account that will receive the created tokens.
+    * @param amount The amount that will be created.
     */
-    function snapshotBurn(address _account) internal {
+    function _mint(address account, uint256 amount) internal {
+        super._mint(account, amount);
         updateValueAtNow(_snapshotTotalSupply, totalSupply());
-        updateValueAtNow(_snapshotBalances[_account], balanceOf(_account));
+        updateValueAtNow(_snapshotBalances[account], balanceOf(account));
     }
-    
-    /**
-    * @dev creates a snapshot after the mint action takes place
-    * @param _to The address that will be assigned the new tokens
+
+    /** OVERRIDE
+    * @dev Internal function that burns an amount of the token of a given
+    * account.
+    * @param account The account whose tokens will be burnt.
+    * @param amount The amount that will be burnt.
     */
-    function snapshotMint(address _to) internal {
+    function _burn(address account, uint256 amount) internal {
+        super._burn(account, amount);
         updateValueAtNow(_snapshotTotalSupply, totalSupply());
-        updateValueAtNow(_snapshotBalances[_to], balanceOf(_to));
+        updateValueAtNow(_snapshotBalances[account], balanceOf(account));
+    }
+
+    /** OVERRIDE
+    * @dev Internal function that burns an amount of the token of a given
+    * account, deducting from the sender's allowance for said account. Uses the
+    * internal burn function.
+    * @param account The account whose tokens will be burnt.
+    * @param amount The amount that will be burnt.
+    */
+    function _burnFrom(address account, uint256 amount) internal {
+        super._burnFrom(account, amount);
+        updateValueAtNow(_snapshotTotalSupply, totalSupply());
+        updateValueAtNow(_snapshotBalances[account], balanceOf(account));
     }
 }
