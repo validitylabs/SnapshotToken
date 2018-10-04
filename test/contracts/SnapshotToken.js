@@ -245,6 +245,8 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
                             transferEvents[0].to.should.be.equal(recipient3);
                             transferEvents[0].value.should.be.bignumber.equal(amount);
                         });
+
+
                     });
                 });
             });
@@ -367,13 +369,6 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
 
                 it('emits a transfer event', async () => {
                     const transferEvents = getEvents(tx, 'Transfer');
-                    transferEvents[0].from.should.be.equal(owner);
-                    transferEvents[0].to.should.be.equal(initialOwner);
-                    transferEvents[0].value.should.be.bignumber.equal(amount);
-                });
-
-                it('emits a snapshot event', async () => {
-                    const transferEvents = getEvents(tx, 'SnapshotCreated');
                     transferEvents[0].from.should.be.equal(owner);
                     transferEvents[0].to.should.be.equal(initialOwner);
                     transferEvents[0].value.should.be.bignumber.equal(amount);

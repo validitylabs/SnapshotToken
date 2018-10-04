@@ -34,9 +34,6 @@ contract ERC20SnapshotToken is ERC20, IERC20SnapshotToken {
     // Tracks the history of the `totalSupply` of the token
     Snapshot[] private _snapshotTotalSupply;
 
-    /*** EVENTS ***/
-    event SnapshotCreated(address indexed from, address indexed to, uint256 value);
-
     /*** FUNCTIONS ***/
     /**
     * @dev Send `_value` tokens to `_to` from `msg.sender`
@@ -91,8 +88,6 @@ contract ERC20SnapshotToken is ERC20, IERC20SnapshotToken {
     function createSnapshot(address _from, address _to, uint _value) internal {
         updateValueAtNow(_snapshotBalances[_from], balanceOf(_from));
         updateValueAtNow(_snapshotBalances[_to], balanceOf(_to));
-        
-        emit SnapshotCreated(_from, _to, _value);
     }
 
     /**
@@ -148,7 +143,6 @@ contract ERC20SnapshotToken is ERC20, IERC20SnapshotToken {
     function snapshotBurn(address _account) internal {
         updateValueAtNow(_snapshotTotalSupply, totalSupply());
         updateValueAtNow(_snapshotBalances[_account], balanceOf(_account));
-        emit SnapshotCreated(_account, 0x0, balanceOf(_account));
     }
     
     /**
@@ -158,6 +152,5 @@ contract ERC20SnapshotToken is ERC20, IERC20SnapshotToken {
     function snapshotMint(address _to) internal {
         updateValueAtNow(_snapshotTotalSupply, totalSupply());
         updateValueAtNow(_snapshotBalances[_to], balanceOf(_to));
-        emit SnapshotCreated(0x0, _to, balanceOf(_to));
     }
 }
