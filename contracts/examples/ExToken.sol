@@ -6,8 +6,6 @@
 pragma solidity 0.4.24;  
 
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20Pausable.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20Burnable.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20Mintable.sol";
 import "../token/ERC20/ERC20SnapshotToken.sol";
 import "../token/ERC20/BurnableERC20SnapshotToken.sol";
 import "../token/ERC20/MintableERC20SnapshotToken.sol";
