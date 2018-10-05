@@ -7,7 +7,7 @@ pragma solidity 0.4.24;
 
 
 /* solhint-disable no-empty-blocks */
-contract IERC20SnapshotToken {   
+contract IERC20Snapshot {   
     /**
     * @dev Queries the balance of `_owner` at a specific `_blockNumber`
     * @param _owner The address from which the balance will be retrieved

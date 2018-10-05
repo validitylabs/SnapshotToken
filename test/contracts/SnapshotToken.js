@@ -7,7 +7,7 @@
 import {expectThrow, getEvents, BigNumber} from './helpers/tools';
 import {logger as log} from '../../tools/lib/logger';
 
-const SnapshotToken = artifacts.require('./ASnapshotToken');
+const SnapshotToken = artifacts.require('./SnapshotTokenExample');
 
 require('chai')
     .use(require('chai-as-promised'))
@@ -29,8 +29,8 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
     });
 
     describe('when instantiated', () => {
-        const name = 'Example Token';
-        const symbol = 'ExT';
+        const name = 'ERC20Snapshot';
+        const symbol = 'SST';
         const decimals = 18;
 
         it('has the right name', async () => {
@@ -245,8 +245,6 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
                             transferEvents[0].to.should.be.equal(recipient3);
                             transferEvents[0].value.should.be.bignumber.equal(amount);
                         });
-
-
                     });
                 });
             });
@@ -449,11 +447,9 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
         });
 
         context('when the amount to burn is not greater than the balance', async () => {
-            let amount;
             let tx;
             let blockNum;
             before(async () => {
-                amount = await snapshotTokenInstance.balanceOf(owner);
                 tx = await snapshotTokenInstance.burn(amount, {from: owner});
                 blockNum = web3.eth.blockNumber;
             });
@@ -464,8 +460,42 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
                 (await snapshotTokenInstance.totalSupplyAt(blockNum)).should.be.bignumber.equal(totalSupply.sub(amount));
                 (await snapshotTokenInstance.totalSupplyAt(blockNum - 1)).should.be.bignumber.equal(totalSupply);
 
-                (await snapshotTokenInstance.balanceOfAt(owner, blockNum)).should.be.bignumber.equal(0);
-                (await snapshotTokenInstance.balanceOfAt(owner, blockNum - 1)).should.be.bignumber.equal(amount);
+                (await snapshotTokenInstance.balanceOfAt(owner, blockNum)).should.be.bignumber.equal(70);
+                (await snapshotTokenInstance.balanceOfAt(owner, blockNum - 1)).should.be.bignumber.equal(80);
+            });
+
+            it('emits a transfer event', async () => {
+                const transferEvents = getEvents(tx, 'Transfer');
+                transferEvents[0].from.should.be.equal(owner);
+                transferEvents[0].to.should.be.equal(zeroAddress);
+                transferEvents[0].value.should.be.bignumber.equal(amount);
+            });
+        });
+    });
+
+    describe('burnFrom', async () => {
+        context('when the amount to burnFrom is greater than the balance', async () => {
+            it('fails', async () => {
+                await expectThrow(snapshotTokenInstance.burnFrom(owner, (amount.mul(2)), {from: anotherAccount}));
+            });
+        });
+
+        context('when the amount to burnFrom is not greater than the balance', async () => {
+            let tx;
+            let blockNum;
+            before(async () => {
+                tx = await snapshotTokenInstance.burnFrom(owner, amount, {from: anotherAccount});
+                blockNum = web3.eth.blockNumber;
+            });
+
+            it('burnFrom the requested amount', async () => {
+                (await snapshotTokenInstance.totalSupply()).should.be.bignumber.equal(totalSupply.sub(amount.mul(2)));
+
+                (await snapshotTokenInstance.totalSupplyAt(blockNum)).should.be.bignumber.equal(totalSupply.sub(amount.mul(2)));
+                (await snapshotTokenInstance.totalSupplyAt(blockNum - 1)).should.be.bignumber.equal(totalSupply.sub(amount));
+
+                (await snapshotTokenInstance.balanceOfAt(owner, blockNum)).should.be.bignumber.equal(60);
+                (await snapshotTokenInstance.balanceOfAt(owner, blockNum - 1)).should.be.bignumber.equal(70);
             });
 
             it('emits a transfer event', async () => {

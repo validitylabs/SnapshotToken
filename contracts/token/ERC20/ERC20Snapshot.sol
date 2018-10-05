@@ -8,10 +8,10 @@ pragma solidity 0.4.24;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
-import "./IERC20SnapshotToken.sol";
+import "./IERC20Snapshot.sol";
 
 
-contract ERC20SnapshotToken is ERC20, IERC20SnapshotToken {   
+contract ERC20Snapshot is ERC20, IERC20Snapshot {   
     using SafeMath for uint256;
 
     /**

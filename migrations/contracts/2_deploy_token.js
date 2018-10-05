@@ -1,7 +1,7 @@
 /**
  * Migration - Snapshot Token Implementation
  */
-const SnapshotToken = artifacts.require('./ASnapshotToken.sol');
+const SnapshotToken = artifacts.require('./SnapshotTokenExample.sol');
 
 module.exports = function (deployer) {
     deployer.deploy(SnapshotToken).then(() => {
