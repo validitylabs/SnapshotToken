@@ -6,6 +6,6 @@ module.exports = {
     // testCommand: '../node_modules/.bin/truffle test --network coverage',
     copyPackages: ['openzeppelin-solidity'],
     norpc: false,
-    skipFiles: ['token/ERC20/IERC20Snapshot.sol']
+    skipFiles: ['token/ERC20/IERC20Snapshot.sol','examples/ERC20Token.sol']
 };
 

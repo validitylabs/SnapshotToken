@@ -3,7 +3,6 @@
  *
  * @author Validity Labs AG <info@validitylabs.org>
  */
-
 import {expectThrow, getEvents, BigNumber} from './helpers/tools';
 import {logger as log} from '../../tools/lib/logger';
 
@@ -116,6 +115,8 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
             let blockNum2;
 
             before(async () => {
+                (await snapshotTokenInstance.balanceOfAt(owner, web3.eth.blockNumber)).should.be.bignumber.equal(0);
+
                 tx = await snapshotTokenInstance.mint(owner, (totalSupply.sub(amount)), {from: owner});
                 blockNum = web3.eth.blockNumber;
                 tx2 = await snapshotTokenInstance.mint(recipient1, amount, {from: owner});
