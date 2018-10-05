@@ -11,7 +11,7 @@ import "openzeppelin-solidity/contracts/token/ERC20/ERC20Mintable.sol";
 import "../token/ERC20/ERC20SnapshotToken.sol";
 
 /* solhint-disable */
-contract ExToken is ERC20SnapshotToken, ERC20Pausable, ERC20Burnable, ERC20Mintable {
+contract ASnapshotToken is ERC20SnapshotToken, ERC20Pausable, ERC20Burnable, ERC20Mintable {
     string public constant name = "Example Token";
     string public constant symbol = "ExT";
     uint8 public constant decimals = 18;

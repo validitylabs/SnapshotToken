@@ -7,7 +7,7 @@
 import {expectThrow, getEvents, BigNumber} from './helpers/tools';
 import {logger as log} from '../../tools/lib/logger';
 
-const ExToken = artifacts.require('./ExToken');
+const SnapshotToken = artifacts.require('./ASnapshotToken');
 
 require('chai')
     .use(require('chai-as-promised'))
@@ -22,10 +22,10 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
     const amount = new BigNumber(10);
     const zeroAddress = '0x0000000000000000000000000000000000000000';
 
-    // Provide a newly deployed exTokenInstance for every test case
-    let exTokenInstance;
+    // Provide a newly deployed snapshotTokenInstance for every test case
+    let snapshotTokenInstance;
     before(async () => {
-        exTokenInstance = await ExToken.new();
+        snapshotTokenInstance = await SnapshotToken.new();
     });
 
     describe('when instantiated', () => {
@@ -34,44 +34,44 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
         const decimals = 18;
 
         it('has the right name', async () => {
-            (await exTokenInstance.name()).should.be.equal(name);
+            (await snapshotTokenInstance.name()).should.be.equal(name);
         });
 
         it('has the right symbol', async () => {
-            (await exTokenInstance.symbol()).should.be.equal(symbol);
+            (await snapshotTokenInstance.symbol()).should.be.equal(symbol);
         });
 
         it('has the right decimals', async () => {
-            (await exTokenInstance.decimals()).should.be.bignumber.equal(decimals);
+            (await snapshotTokenInstance.decimals()).should.be.bignumber.equal(decimals);
         });
 
         it('is a minter', async () => {
-            (await exTokenInstance.isMinter(initialOwner)).should.be.equal(true);
+            (await snapshotTokenInstance.isMinter(initialOwner)).should.be.equal(true);
         });
     });
 
     describe('add Minters', async () => {
         context('when called by a non-minter account', async () => {
             it('fails', async () => {
-                await expectThrow(exTokenInstance.addMinter(anotherAccount, {from: anotherAccount}));
+                await expectThrow(snapshotTokenInstance.addMinter(anotherAccount, {from: anotherAccount}));
             });
         });
 
         context('when called by a minter', async () => {
             it('adds another minter', async () => {
-                (await exTokenInstance.isMinter(owner)).should.be.equal(false);
+                (await snapshotTokenInstance.isMinter(owner)).should.be.equal(false);
 
-                await exTokenInstance.addMinter(owner, {from: initialOwner});
+                await snapshotTokenInstance.addMinter(owner, {from: initialOwner});
 
-                (await exTokenInstance.isMinter(owner)).should.be.equal(true);
+                (await snapshotTokenInstance.isMinter(owner)).should.be.equal(true);
             });
         });
 
         context('give up minter role', async () => {
             it('passes', async () => {
-                await exTokenInstance.renounceMinter({from: initialOwner});
+                await snapshotTokenInstance.renounceMinter({from: initialOwner});
 
-                (await exTokenInstance.isMinter(initialOwner)).should.be.equal(false);
+                (await snapshotTokenInstance.isMinter(initialOwner)).should.be.equal(false);
             });
         });
     });
@@ -79,25 +79,25 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
     describe('add Pausers', async () => {
         context('when called by a non-pauser account', async () => {
             it('fails', async () => {
-                await expectThrow(exTokenInstance.addPauser(anotherAccount, {from: anotherAccount}));
+                await expectThrow(snapshotTokenInstance.addPauser(anotherAccount, {from: anotherAccount}));
             });
         });
 
         context('when called by a pauser', async () => {
             it('adds another pauser', async () => {
-                (await exTokenInstance.isPauser(owner)).should.be.equal(false);
+                (await snapshotTokenInstance.isPauser(owner)).should.be.equal(false);
 
-                await exTokenInstance.addPauser(owner, {from: initialOwner});
+                await snapshotTokenInstance.addPauser(owner, {from: initialOwner});
 
-                (await exTokenInstance.isPauser(owner)).should.be.equal(true);
+                (await snapshotTokenInstance.isPauser(owner)).should.be.equal(true);
             });
         });
 
         context('give up pauser role', async () => {
             it('passes', async () => {
-                await exTokenInstance.renouncePauser({from: initialOwner});
+                await snapshotTokenInstance.renouncePauser({from: initialOwner});
 
-                (await exTokenInstance.isPauser(initialOwner)).should.be.equal(false);
+                (await snapshotTokenInstance.isPauser(initialOwner)).should.be.equal(false);
             });
         });
     });
@@ -105,7 +105,7 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
     describe('mint', async () => {
         context('when called by a non-minter account', async () => {
             it('fails', async () => {
-                await expectThrow(exTokenInstance.mint(owner, totalSupply, {from: anotherAccount}));
+                await expectThrow(snapshotTokenInstance.mint(owner, totalSupply, {from: anotherAccount}));
             });
         });
 
@@ -116,25 +116,25 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
             let blockNum2;
 
             before(async () => {
-                tx = await exTokenInstance.mint(owner, (totalSupply.sub(amount)), {from: owner});
+                tx = await snapshotTokenInstance.mint(owner, (totalSupply.sub(amount)), {from: owner});
                 blockNum = web3.eth.blockNumber;
-                tx2 = await exTokenInstance.mint(recipient1, amount, {from: owner});
+                tx2 = await snapshotTokenInstance.mint(recipient1, amount, {from: owner});
                 blockNum2 = web3.eth.blockNumber;
             });
 
             it('mints requested amount', async () => {
-                (await exTokenInstance.totalSupply()).should.be.bignumber.equal(totalSupply);
-                (await exTokenInstance.totalSupplyAt(blockNum2)).should.be.bignumber.equal(totalSupply);
-                (await exTokenInstance.totalSupplyAt(blockNum)).should.be.bignumber.equal(totalSupply.sub(amount));
-                (await exTokenInstance.totalSupplyAt(blockNum - 1)).should.be.bignumber.equal(0);
+                (await snapshotTokenInstance.totalSupply()).should.be.bignumber.equal(totalSupply);
+                (await snapshotTokenInstance.totalSupplyAt(blockNum2)).should.be.bignumber.equal(totalSupply);
+                (await snapshotTokenInstance.totalSupplyAt(blockNum)).should.be.bignumber.equal(totalSupply.sub(amount));
+                (await snapshotTokenInstance.totalSupplyAt(blockNum - 1)).should.be.bignumber.equal(0);
 
-                (await exTokenInstance.balanceOf(owner)).should.be.bignumber.equal(totalSupply.sub(amount));
-                (await exTokenInstance.balanceOfAt(owner, blockNum)).should.be.bignumber.equal(totalSupply.sub(amount));
-                (await exTokenInstance.balanceOfAt(owner, blockNum - 1)).should.be.bignumber.equal(0);
+                (await snapshotTokenInstance.balanceOf(owner)).should.be.bignumber.equal(totalSupply.sub(amount));
+                (await snapshotTokenInstance.balanceOfAt(owner, blockNum)).should.be.bignumber.equal(totalSupply.sub(amount));
+                (await snapshotTokenInstance.balanceOfAt(owner, blockNum - 1)).should.be.bignumber.equal(0);
 
-                (await exTokenInstance.balanceOf(recipient1)).should.be.bignumber.equal(amount);
-                (await exTokenInstance.balanceOfAt(recipient1, blockNum2)).should.be.bignumber.equal(amount);
-                (await exTokenInstance.balanceOfAt(recipient1, blockNum2 - 1)).should.be.bignumber.equal(0);
+                (await snapshotTokenInstance.balanceOf(recipient1)).should.be.bignumber.equal(amount);
+                (await snapshotTokenInstance.balanceOfAt(recipient1, blockNum2)).should.be.bignumber.equal(amount);
+                (await snapshotTokenInstance.balanceOfAt(recipient1, blockNum2 - 1)).should.be.bignumber.equal(0);
             });
 
             it('emits a transfer event', async () => {
@@ -164,16 +164,16 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
     describe('finishMinting', async () => {
         context('when token minting hasn\'t finished', async () => {
             it('finishes token minting', async () => {
-                await exTokenInstance.finishMinting({from: owner});
+                await snapshotTokenInstance.finishMinting({from: owner});
 
-                (await exTokenInstance.mintingFinished()).should.be.equal(true);
-                await expectThrow(exTokenInstance.mint(owner, totalSupply, {from: owner}));
+                (await snapshotTokenInstance.mintingFinished()).should.be.equal(true);
+                await expectThrow(snapshotTokenInstance.mint(owner, totalSupply, {from: owner}));
             });
         });
 
         context('when token minting had already finished', async () => {
             it('fails', async () => {
-                await expectThrow(exTokenInstance.finishMinting({from: owner}));
+                await expectThrow(snapshotTokenInstance.finishMinting({from: owner}));
             });
         });
     });
@@ -181,37 +181,37 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
     describe('transfer', async () => {
         context('when paused', async () => {
             it('fails', async () => {
-                await exTokenInstance.pause({from: owner});
+                await snapshotTokenInstance.pause({from: owner});
 
-                await expectThrow(exTokenInstance.transfer(recipient3, amount, {from: recipient1}));
-                (await exTokenInstance.balanceOf(recipient3)).should.be.bignumber.equal(0);
+                await expectThrow(snapshotTokenInstance.transfer(recipient3, amount, {from: recipient1}));
+                (await snapshotTokenInstance.balanceOf(recipient3)).should.be.bignumber.equal(0);
             });
         });
 
         context('when unpaused', async () => {
             before(async () => {
-                await exTokenInstance.unpause({from: owner});
+                await snapshotTokenInstance.unpause({from: owner});
             });
 
             context('when the sender hasn\'t enough balance', async () => {
                 it('fails', async () => {
-                    await expectThrow(exTokenInstance.transfer(recipient3, amount, {from: anotherAccount}));
-                    (await exTokenInstance.balanceOf(recipient3)).should.be.bignumber.equal(0);
+                    await expectThrow(snapshotTokenInstance.transfer(recipient3, amount, {from: anotherAccount}));
+                    (await snapshotTokenInstance.balanceOf(recipient3)).should.be.bignumber.equal(0);
                 });
             });
 
             context('when the sender has enough balance', async () => {
                 context('when recipient is zero address', async () => {
                     it('fails', async () => {
-                        await expectThrow(exTokenInstance.transfer(zeroAddress, amount, {from: recipient1}));
-                        (await exTokenInstance.balanceOf(zeroAddress)).should.be.bignumber.equal(0);
+                        await expectThrow(snapshotTokenInstance.transfer(zeroAddress, amount, {from: recipient1}));
+                        (await snapshotTokenInstance.balanceOf(zeroAddress)).should.be.bignumber.equal(0);
                     });
                 });
 
                 context('when recipient is different to zero address and the token contract', async () => {
                     context('when amount is zero', async () => {
                         it('emits a transfer event', async () => {
-                            const tx = await exTokenInstance.transfer(recipient3, 0, {from: recipient1});
+                            const tx = await snapshotTokenInstance.transfer(recipient3, 0, {from: recipient1});
                             const transferEvents = getEvents(tx, 'Transfer');
 
                             transferEvents[0].from.should.be.equal(recipient1);
@@ -225,17 +225,17 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
                         let blockNum;
                         let amount;
                         before(async () => {
-                            amount = await exTokenInstance.balanceOf(recipient1);
-                            tx = await exTokenInstance.transfer(recipient3, amount, {from: recipient1});
+                            amount = await snapshotTokenInstance.balanceOf(recipient1);
+                            tx = await snapshotTokenInstance.transfer(recipient3, amount, {from: recipient1});
                             blockNum = web3.eth.blockNumber;
                         });
 
                         it('transfers requested amount', async () => {
-                            (await exTokenInstance.balanceOf(recipient1)).should.be.bignumber.equal(0);
-                            (await exTokenInstance.balanceOf(recipient3)).should.be.bignumber.equal(amount);
+                            (await snapshotTokenInstance.balanceOf(recipient1)).should.be.bignumber.equal(0);
+                            (await snapshotTokenInstance.balanceOf(recipient3)).should.be.bignumber.equal(amount);
 
-                            (await exTokenInstance.balanceOfAt(recipient1, blockNum - 1)).should.be.bignumber.equal(amount);
-                            (await exTokenInstance.balanceOfAt(recipient3, blockNum - 1)).should.be.bignumber.equal(0);
+                            (await snapshotTokenInstance.balanceOfAt(recipient1, blockNum - 1)).should.be.bignumber.equal(amount);
+                            (await snapshotTokenInstance.balanceOfAt(recipient3, blockNum - 1)).should.be.bignumber.equal(0);
                         });
 
                         it('emits a transfer event', async () => {
@@ -256,24 +256,24 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
     describe('approve', async () => {
         context('when paused', async () => {
             it('fails', async () => {
-                await exTokenInstance.pause({from: owner});
+                await snapshotTokenInstance.pause({from: owner});
 
-                await expectThrow(exTokenInstance.approve(anotherAccount, amount, {from: recipient3}));
+                await expectThrow(snapshotTokenInstance.approve(anotherAccount, amount, {from: recipient3}));
             });
         });
 
         context('when unpaused', async () => {
             before(async () => {
-                await exTokenInstance.unpause({from: owner});
+                await snapshotTokenInstance.unpause({from: owner});
             });
             context('when spender has no previous approved amount', async () => {
                 let tx;
                 before(async () => {
-                    tx = await exTokenInstance.approve(anotherAccount, 1, {from: recipient3});
+                    tx = await snapshotTokenInstance.approve(anotherAccount, 1, {from: recipient3});
                 });
 
                 it('approves the requested amount', async () => {
-                    (await exTokenInstance.allowance(recipient3, anotherAccount)).should.be.bignumber.equal(1);
+                    (await snapshotTokenInstance.allowance(recipient3, anotherAccount)).should.be.bignumber.equal(1);
                 });
 
                 it('emits an approval event', async () => {
@@ -288,11 +288,11 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
                 context('when new amount is zero', async () => {
                     let tx;
                     before(async () => {
-                        tx = await exTokenInstance.approve(anotherAccount, 0, {from: recipient3});
+                        tx = await snapshotTokenInstance.approve(anotherAccount, 0, {from: recipient3});
                     });
 
                     it('replaces the approved amount with zero', async () => {
-                        (await exTokenInstance.allowance(recipient3, anotherAccount)).should.be.bignumber.equal(0);
+                        (await snapshotTokenInstance.allowance(recipient3, anotherAccount)).should.be.bignumber.equal(0);
                     });
 
                     it('emits an approval event', async () => {
@@ -308,25 +308,25 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
 
     describe('transferFrom', async () => {
         before(async () => {
-            await exTokenInstance.approve(anotherAccount, amount, {from: owner});
+            await snapshotTokenInstance.approve(anotherAccount, amount, {from: owner});
         });
 
         context('when paused', async () => {
             it('fails', async () => {
-                await exTokenInstance.pause({from: owner});
+                await snapshotTokenInstance.pause({from: owner});
 
-                await expectThrow(exTokenInstance.transferFrom(owner, initialOwner, amount, {from: anotherAccount}));
+                await expectThrow(snapshotTokenInstance.transferFrom(owner, initialOwner, amount, {from: anotherAccount}));
             });
         });
 
         context('when unpaused', async () => {
             before(async () => {
-                await exTokenInstance.unpause({from: owner});
+                await snapshotTokenInstance.unpause({from: owner});
             });
 
             context('when spender hasn\'t enough approved balance', async () => {
                 it('fails', async () => {
-                    await expectThrow(exTokenInstance.transferFrom(owner, initialOwner, amount + 1, {from: anotherAccount}));
+                    await expectThrow(snapshotTokenInstance.transferFrom(owner, initialOwner, amount + 1, {from: anotherAccount}));
                 });
             });
 
@@ -334,37 +334,37 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
                 let tx;
                 let blockNum;
                 before(async () => {
-                    let balance = await exTokenInstance.balanceOf(owner);
+                    let balance = await snapshotTokenInstance.balanceOf(owner);
                     log.info(balance.toNumber());
 
-                    balance = await exTokenInstance.balanceOf(initialOwner);
+                    balance = await snapshotTokenInstance.balanceOf(initialOwner);
                     log.info(balance.toNumber());
 
-                    tx = await exTokenInstance.transferFrom(owner, initialOwner, amount, {from: anotherAccount});
+                    tx = await snapshotTokenInstance.transferFrom(owner, initialOwner, amount, {from: anotherAccount});
                     blockNum = web3.eth.blockNumber;
                 });
 
                 it('transfers the requested amount', async () => {
-                    (await exTokenInstance.allowance(owner, anotherAccount)).should.be.bignumber.equal(0);
+                    (await snapshotTokenInstance.allowance(owner, anotherAccount)).should.be.bignumber.equal(0);
 
-                    let balance = await exTokenInstance.balanceOf(owner);
+                    let balance = await snapshotTokenInstance.balanceOf(owner);
                     log.info(balance.toNumber());
-                    balance = await exTokenInstance.balanceOf(initialOwner);
+                    balance = await snapshotTokenInstance.balanceOf(initialOwner);
                     log.info(balance.toNumber());
-                    (await exTokenInstance.balanceOf(owner)).should.be.bignumber.equal(totalSupply.sub(amount.mul(2)));
-                    (await exTokenInstance.balanceOf(initialOwner)).should.be.bignumber.equal(amount);
+                    (await snapshotTokenInstance.balanceOf(owner)).should.be.bignumber.equal(totalSupply.sub(amount.mul(2)));
+                    (await snapshotTokenInstance.balanceOf(initialOwner)).should.be.bignumber.equal(amount);
 
-                    balance = await exTokenInstance.balanceOfAt(owner, blockNum);
+                    balance = await snapshotTokenInstance.balanceOfAt(owner, blockNum);
                     log.info(balance.toNumber());
-                    balance = await exTokenInstance.balanceOfAt(initialOwner, blockNum);
+                    balance = await snapshotTokenInstance.balanceOfAt(initialOwner, blockNum);
                     log.info(balance.toNumber());
-                    (await exTokenInstance.balanceOfAt(owner, blockNum + 1)).should.be.bignumber.equal(totalSupply.sub(amount.mul(2)));
-                    (await exTokenInstance.balanceOfAt(initialOwner, blockNum)).should.be.bignumber.equal(amount);
+                    (await snapshotTokenInstance.balanceOfAt(owner, blockNum + 1)).should.be.bignumber.equal(totalSupply.sub(amount.mul(2)));
+                    (await snapshotTokenInstance.balanceOfAt(initialOwner, blockNum)).should.be.bignumber.equal(amount);
 
-                    balance = await exTokenInstance.balanceOfAt(owner, blockNum - 1);
+                    balance = await snapshotTokenInstance.balanceOfAt(owner, blockNum - 1);
                     log.info(balance.toNumber());
-                    (await exTokenInstance.balanceOfAt(owner, blockNum - 1)).should.be.bignumber.equal(totalSupply.sub(amount));
-                    (await exTokenInstance.balanceOfAt(initialOwner, blockNum - 1)).should.be.bignumber.equal(0);
+                    (await snapshotTokenInstance.balanceOfAt(owner, blockNum - 1)).should.be.bignumber.equal(totalSupply.sub(amount));
+                    (await snapshotTokenInstance.balanceOfAt(initialOwner, blockNum - 1)).should.be.bignumber.equal(0);
                 });
 
                 it('emits a transfer event', async () => {
@@ -379,26 +379,26 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
 
     describe('increaseAllowance', async () => {
         before(async () => {
-            await exTokenInstance.approve(anotherAccount, amount, {from: owner});
+            await snapshotTokenInstance.approve(anotherAccount, amount, {from: owner});
         });
 
         context('when paused', async () => {
             it('fails', async () => {
-                await exTokenInstance.pause({from: owner});
+                await snapshotTokenInstance.pause({from: owner});
 
-                await expectThrow(exTokenInstance.increaseAllowance(anotherAccount, 1, {from: owner}));
+                await expectThrow(snapshotTokenInstance.increaseAllowance(anotherAccount, 1, {from: owner}));
             });
         });
 
         context('when unpaused', async () => {
             let tx;
             before(async () => {
-                await exTokenInstance.unpause({from: owner});
-                tx = await exTokenInstance.increaseAllowance(anotherAccount, 1, {from: owner});
+                await snapshotTokenInstance.unpause({from: owner});
+                tx = await snapshotTokenInstance.increaseAllowance(anotherAccount, 1, {from: owner});
             });
 
             it('increases allowance', async () => {
-                (await exTokenInstance.allowance(owner, anotherAccount)).should.be.bignumber.equal(amount.add(1));
+                (await snapshotTokenInstance.allowance(owner, anotherAccount)).should.be.bignumber.equal(amount.add(1));
             });
 
             it('emits an approval event', async () => {
@@ -413,25 +413,25 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
     describe('decreaseAllowance', async () => {
         context('when paused', async () => {
             it('fails', async () => {
-                await exTokenInstance.pause({from: owner});
+                await snapshotTokenInstance.pause({from: owner});
 
-                await expectThrow(exTokenInstance.decreaseAllowance(anotherAccount, 1, {from: owner}));
+                await expectThrow(snapshotTokenInstance.decreaseAllowance(anotherAccount, 1, {from: owner}));
             });
         });
 
         context('when unpaused', async () => {
             let tx;
             before(async () => {
-                await exTokenInstance.unpause({from: owner});
-                tx = await exTokenInstance.decreaseAllowance(anotherAccount, 1, {from: owner});
+                await snapshotTokenInstance.unpause({from: owner});
+                tx = await snapshotTokenInstance.decreaseAllowance(anotherAccount, 1, {from: owner});
             });
 
             it('decreases allowance', async () => {
-                (await exTokenInstance.allowance(owner, anotherAccount)).should.be.bignumber.equal(amount);
+                (await snapshotTokenInstance.allowance(owner, anotherAccount)).should.be.bignumber.equal(amount);
             });
 
             it('emits an approval event', async () => {
-                (await exTokenInstance.allowance(owner, anotherAccount)).should.be.bignumber.equal(amount);
+                (await snapshotTokenInstance.allowance(owner, anotherAccount)).should.be.bignumber.equal(amount);
 
                 const approvalEvents = getEvents(tx, 'Approval');
                 approvalEvents[0].owner.should.be.equal(owner);
@@ -444,7 +444,7 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
     describe('burn', async () => {
         context('when the amount to burn is greater than the balance', async () => {
             it('fails', async () => {
-                await expectThrow(exTokenInstance.burn(totalSupply, {from: owner}));
+                await expectThrow(snapshotTokenInstance.burn(totalSupply, {from: owner}));
             });
         });
 
@@ -453,19 +453,19 @@ contract('Snapshot Token', ([initialOwner, owner, recipient1, recipient2, recipi
             let tx;
             let blockNum;
             before(async () => {
-                amount = await exTokenInstance.balanceOf(owner);
-                tx = await exTokenInstance.burn(amount, {from: owner});
+                amount = await snapshotTokenInstance.balanceOf(owner);
+                tx = await snapshotTokenInstance.burn(amount, {from: owner});
                 blockNum = web3.eth.blockNumber;
             });
 
             it('burns the requested amount', async () => {
-                (await exTokenInstance.totalSupply()).should.be.bignumber.equal(totalSupply.sub(amount));
+                (await snapshotTokenInstance.totalSupply()).should.be.bignumber.equal(totalSupply.sub(amount));
 
-                (await exTokenInstance.totalSupplyAt(blockNum)).should.be.bignumber.equal(totalSupply.sub(amount));
-                (await exTokenInstance.totalSupplyAt(blockNum - 1)).should.be.bignumber.equal(totalSupply);
+                (await snapshotTokenInstance.totalSupplyAt(blockNum)).should.be.bignumber.equal(totalSupply.sub(amount));
+                (await snapshotTokenInstance.totalSupplyAt(blockNum - 1)).should.be.bignumber.equal(totalSupply);
 
-                (await exTokenInstance.balanceOfAt(owner, blockNum)).should.be.bignumber.equal(0);
-                (await exTokenInstance.balanceOfAt(owner, blockNum - 1)).should.be.bignumber.equal(amount);
+                (await snapshotTokenInstance.balanceOfAt(owner, blockNum)).should.be.bignumber.equal(0);
+                (await snapshotTokenInstance.balanceOfAt(owner, blockNum - 1)).should.be.bignumber.equal(amount);
             });
 
             it('emits a transfer event', async () => {
