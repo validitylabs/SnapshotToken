@@ -91,18 +91,18 @@ contract ERC20Snapshot is ERC20, IERC20Snapshot {
     /**
     * @dev `getValueAt` retrieves the number of tokens at a given block.timestamp
     * @param checkpoints The history of values being queried
-    * @param _block The block.timestamp to retrieve the value at
+    * @param _timestamp The block.timestamp to retrieve the value at
     * @return The number of tokens being queried
     */
-    function getValueAt(Snapshot[] storage checkpoints, uint _block) internal view returns (uint) {
+    function getValueAt(Snapshot[] storage checkpoints, uint _timestamp) internal view returns (uint) {
         if (checkpoints.length == 0) return 0;
 
         // Shortcut for the actual value
-        if (_block >= checkpoints[checkpoints.length.sub(1)].timestamp) {
+        if (_timestamp >= checkpoints[checkpoints.length.sub(1)].timestamp) {
             return checkpoints[checkpoints.length.sub(1)].value;
         }
 
-        if (_block < checkpoints[0].timestamp) {
+        if (_timestamp < checkpoints[0].timestamp) {
             return 0;
         } 
 
@@ -112,7 +112,7 @@ contract ERC20Snapshot is ERC20, IERC20Snapshot {
 
         while (max > min) {
             uint mid = (max.add(min).add(1)).div(2);
-            if (checkpoints[mid].timestamp <= _block) {
+            if (checkpoints[mid].timestamp <= _timestamp) {
                 min = mid;
             } else {
                 max = mid.sub(1);
