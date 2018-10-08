@@ -205,12 +205,12 @@ contract('ERC20Snapshot', function ([_, owner, recipient, anotherAccount]) {
 
           it('verifies snapshot history', async function () {
             await this.token.transferFrom(owner, to, amount, { from: spender });
-
+  
             const blockNum = web3.eth.blockNumber;
-
+  
             (await this.token.balanceOfAt(owner, blockNum)).should.be.bignumber.equal(0);
             (await this.token.balanceOfAt(owner, blockNum - 1)).should.be.bignumber.equal(amount);
-
+  
             (await this.token.balanceOfAt(to, blockNum)).should.be.bignumber.equal(amount);
             (await this.token.balanceOfAt(to, blockNum - 1)).should.be.bignumber.equal(0);
           });
@@ -426,11 +426,11 @@ contract('ERC20Snapshot', function ([_, owner, recipient, anotherAccount]) {
     const initialSupply = new BigNumber(100);
     const amount = new BigNumber(50);
 
-    it('rejects a zero account', async function () {
+    it('rejects a null account', async function () {
       await assertRevert(this.token.mint(ZERO_ADDRESS, amount));
     });
 
-    describe('for a non zero account', function () {
+    describe('for a non null account', function () {
       beforeEach('minting', async function () {
         const { logs } = await this.token.mint(recipient, amount);
         this.logs = logs;
@@ -443,13 +443,6 @@ contract('ERC20Snapshot', function ([_, owner, recipient, anotherAccount]) {
 
       it('increments recipient balance', async function () {
         (await this.token.balanceOf(recipient)).should.be.bignumber.equal(amount);
-      });
-
-      it('verifies snapshot history', async function () {
-        const blockNum = web3.eth.blockNumber;
-
-        (await this.token.balanceOfAt(recipient, blockNum)).should.be.bignumber.equal(amount);
-        (await this.token.balanceOfAt(recipient, blockNum - 1)).should.be.bignumber.equal(0);
       });
 
       it('emits Transfer event', async function () {
@@ -466,11 +459,11 @@ contract('ERC20Snapshot', function ([_, owner, recipient, anotherAccount]) {
   describe('_burn', function () {
     const initialSupply = new BigNumber(100);
 
-    it('rejects a zero account', async function () {
+    it('rejects a null account', async function () {
       await assertRevert(this.token.burn(ZERO_ADDRESS, 1));
     });
 
-    describe('for a non zero account', function () {
+    describe('for a non null account', function () {
       it('rejects burning more than balance', async function () {
         await assertRevert(this.token.burn(owner, initialSupply.plus(1)));
       });
@@ -490,13 +483,6 @@ contract('ERC20Snapshot', function ([_, owner, recipient, anotherAccount]) {
           it('decrements owner balance', async function () {
             const expectedBalance = initialSupply.minus(amount);
             (await this.token.balanceOf(owner)).should.be.bignumber.equal(expectedBalance);
-          });
-
-          it('verifies snapshot history', async function () {
-            const blockNum = web3.eth.blockNumber;
-
-            (await this.token.balanceOfAt(owner, blockNum)).should.be.bignumber.equal(initialSupply.sub(amount));
-            (await this.token.balanceOfAt(owner, blockNum - 1)).should.be.bignumber.equal(initialSupply);
           });
 
           it('emits Transfer event', async function () {
@@ -558,13 +544,6 @@ contract('ERC20Snapshot', function ([_, owner, recipient, anotherAccount]) {
           it('decrements spender allowance', async function () {
             const expectedAllowance = allowance.minus(amount);
             (await this.token.allowance(owner, spender)).should.be.bignumber.equal(expectedAllowance);
-          });
-
-          it('verifies snapshot history', async function () {
-            const blockNum = web3.eth.blockNumber;
-
-            (await this.token.balanceOfAt(owner, blockNum)).should.be.bignumber.equal(initialSupply.sub(amount));
-            (await this.token.balanceOfAt(owner, blockNum - 1)).should.be.bignumber.equal(initialSupply);
           });
 
           it('emits Transfer event', async function () {
