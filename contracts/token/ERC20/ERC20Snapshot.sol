@@ -11,21 +11,21 @@ import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "./IERC20Snapshot.sol";
 
 
+/* solhint-disable not-rely-on-time*/
 contract ERC20Snapshot is ERC20, IERC20Snapshot {   
     using SafeMath for uint256;
 
     /**
-    * @dev `Snapshot` is the structure that attaches a block number to a
-    * given value. The block number attached is the one that last changed the value
+    * @dev `Snapshot` is the structure that relates a block.timestamp to a value. 
     */
     struct Snapshot {
-        uint128 fromBlock;  // `fromBlock` is the block number at which the value was generated from
-        uint128 value;  // `value` is the amount of tokens at a specific block number
+        uint128 timestamp;  // `timestamp` is the block.timestamp at which the value was generated from
+        uint128 value;  // `value` is the amount of tokens at a specific timestamp
     }
 
     /**
     * @dev `_snapshotBalances` is the map that tracks the balance of each address, in this
-    * contract when the balance changes the block number that the change
+    * contract when the balance changes the block.timestamp that the change
     * occurred is also included in the map
     */
     mapping (address => Snapshot[]) private _snapshotBalances;
@@ -58,22 +58,22 @@ contract ERC20Snapshot is ERC20, IERC20Snapshot {
     }
 
     /**
-    * @dev Queries the balance of `_owner` at a specific `_blockNumber`
+    * @dev Queries the balance of `_owner` at a specific `_timestamp`
     * @param _owner The address from which the balance will be retrieved
-    * @param _blockNumber The block number when the balance is queried
-    * @return The balance at `_blockNumber`
+    * @param _timestamp The block.timestamp when the balance is queried
+    * @return The balance at `_timestamp`
     */
-    function balanceOfAt(address _owner, uint _blockNumber) public view returns (uint256) {
-        return getValueAt(_snapshotBalances[_owner], _blockNumber);
+    function balanceOfAt(address _owner, uint _timestamp) public view returns (uint256) {
+        return getValueAt(_snapshotBalances[_owner], _timestamp);
     }
 
     /**
-    * @dev Total amount of tokens at a specific `_blockNumber`.
-    * @param _blockNumber The block number when the totalSupply is queried
-    * @return The total amount of tokens at `_blockNumber`
+    * @dev Total amount of tokens at a specific `_timestamp`.
+    * @param _timestamp The block.timestamp when the totalSupply is queried
+    * @return The total amount of tokens at `_timestamp`
     */
-    function totalSupplyAt(uint _blockNumber) public view returns(uint256) {
-        return getValueAt(_snapshotTotalSupply, _blockNumber);
+    function totalSupplyAt(uint _timestamp) public view returns(uint256) {
+        return getValueAt(_snapshotTotalSupply, _timestamp);
     }
 
     /*** Internal functions ***/
@@ -89,20 +89,20 @@ contract ERC20Snapshot is ERC20, IERC20Snapshot {
     }
 
     /**
-    * @dev `getValueAt` retrieves the number of tokens at a given block number
+    * @dev `getValueAt` retrieves the number of tokens at a given block.timestamp
     * @param checkpoints The history of values being queried
-    * @param _block The block number to retrieve the value at
+    * @param _block The block.timestamp to retrieve the value at
     * @return The number of tokens being queried
     */
     function getValueAt(Snapshot[] storage checkpoints, uint _block) internal view returns (uint) {
         if (checkpoints.length == 0) return 0;
 
         // Shortcut for the actual value
-        if (_block >= checkpoints[checkpoints.length.sub(1)].fromBlock) {
+        if (_block >= checkpoints[checkpoints.length.sub(1)].timestamp) {
             return checkpoints[checkpoints.length.sub(1)].value;
         }
 
-        if (_block < checkpoints[0].fromBlock) {
+        if (_block < checkpoints[0].timestamp) {
             return 0;
         } 
 
@@ -112,7 +112,7 @@ contract ERC20Snapshot is ERC20, IERC20Snapshot {
 
         while (max > min) {
             uint mid = (max.add(min).add(1)).div(2);
-            if (checkpoints[mid].fromBlock <= _block) {
+            if (checkpoints[mid].timestamp <= _block) {
                 min = mid;
             } else {
                 max = mid.sub(1);
@@ -128,8 +128,8 @@ contract ERC20Snapshot is ERC20, IERC20Snapshot {
     * @param _value The new number of tokens
     */
     function updateValueAtNow(Snapshot[] storage checkpoints, uint _value) internal {
-        if ((checkpoints.length == 0) || (checkpoints[checkpoints.length.sub(1)].fromBlock < block.number)) {
-            checkpoints.push(Snapshot(uint128(block.number), uint128(_value)));
+        if ((checkpoints.length == 0) || (checkpoints[checkpoints.length.sub(1)].timestamp < now)) {
+            checkpoints.push(Snapshot(uint128(now), uint128(_value)));
         } else {
             checkpoints[checkpoints.length.sub(1)].value = uint128(_value);
         }
